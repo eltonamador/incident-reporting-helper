@@ -14,6 +14,7 @@ import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { LatLngExpression } from 'leaflet';
+import { supabase } from "@/integrations/supabase/client";
 
 // Fix Leaflet icon issue
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -47,14 +48,48 @@ const CIODES_Recebimento = () => {
     }
   };
 
-  const handleSendToGBM = () => {
+  const handleSendToGBM = async () => {
     if (!selectedGBM) {
       toast.error("Selecione um GBM");
       return;
     }
-    
-    toast.success(`Ocorrência enviada para ${selectedGBM}`);
-    navigate("/");
+
+    try {
+      // Create occurrence record
+      const { data: occurrence, error: occurrenceError } = await supabase
+        .from('occurrences')
+        .insert({
+          description: location.state?.textContent || '',
+          location_lat: coordinates?.lat,
+          location_lng: coordinates?.lng,
+          status: 'pending',
+          assigned_gbm: selectedGBM
+        })
+        .select()
+        .single();
+
+      if (occurrenceError) throw occurrenceError;
+
+      // Upload media files
+      if (location.state?.mediaItems?.length > 0) {
+        const mediaPromises = location.state.mediaItems.map(async (item: any) => {
+          return supabase
+            .from('occurrence_media')
+            .insert({
+              occurrence_id: occurrence.id,
+              media_type: item.type,
+              media_url: item.url
+            });
+        });
+
+        await Promise.all(mediaPromises);
+      }
+
+      toast.success(`Ocorrência enviada para ${selectedGBM}`);
+      navigate("/");
+    } catch (error: any) {
+      toast.error(`Erro ao enviar ocorrência: ${error.message}`);
+    }
   };
 
   // Filter media items by type
@@ -63,7 +98,9 @@ const CIODES_Recebimento = () => {
   const audioItems = location.state?.mediaItems?.filter((item: any) => item.type === "audio") || [];
 
   // Create center coordinates as LatLngExpression
-  const center: LatLngExpression = coordinates ? [coordinates.lat, coordinates.lng] : [-20.2976, -40.2928];
+  const center: LatLngExpression = coordinates 
+    ? [coordinates.lat, coordinates.lng] 
+    : [-20.2976, -40.2928]; // Default to Vitória, ES
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
@@ -137,20 +174,16 @@ const CIODES_Recebimento = () => {
                   : "Obter Localização"}
               </Button>
               
-              {coordinates && (
-                <div className="h-[200px] w-full rounded-lg overflow-hidden border border-gray-200">
-                  <MapContainer
-                    center={center}
-                    zoom={13}
-                    className="h-full w-full"
-                  >
-                    <TileLayer
-                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    />
-                    <Marker position={center} />
-                  </MapContainer>
-                </div>
-              )}
+              <div className="h-[200px] w-full rounded-lg overflow-hidden border border-gray-200">
+                <MapContainer
+                  className="h-full w-full"
+                  zoom={13}
+                  center={center}
+                >
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                  {coordinates && <Marker position={[coordinates.lat, coordinates.lng]} />}
+                </MapContainer>
+              </div>
             </div>
 
             {/* GBM Selection */}

@@ -9,7 +9,71 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      occurrence_media: {
+        Row: {
+          created_at: string | null
+          id: string
+          media_type: string
+          media_url: string
+          occurrence_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          media_type: string
+          media_url: string
+          occurrence_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          media_type?: string
+          media_url?: string
+          occurrence_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "occurrence_media_occurrence_id_fkey"
+            columns: ["occurrence_id"]
+            isOneToOne: false
+            referencedRelation: "occurrences"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      occurrences: {
+        Row: {
+          assigned_gbm: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          location_lat: number | null
+          location_lng: number | null
+          status: Database["public"]["Enums"]["occurrence_status"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_gbm?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          location_lat?: number | null
+          location_lng?: number | null
+          status?: Database["public"]["Enums"]["occurrence_status"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_gbm?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          location_lat?: number | null
+          location_lng?: number | null
+          status?: Database["public"]["Enums"]["occurrence_status"] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +82,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      occurrence_status: "pending" | "assigned" | "in_progress" | "completed"
     }
     CompositeTypes: {
       [_ in never]: never
