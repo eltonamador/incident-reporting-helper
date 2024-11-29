@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MapContainer, TileLayer, Marker } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, MapContainerProps } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -89,9 +89,9 @@ const CIODES = () => {
               {coordinates && (
                 <div className="h-[200px] w-full rounded-lg overflow-hidden border border-gray-200">
                   <MapContainer
-                    center={[coordinates.lat, coordinates.lng]}
+                    className="h-full w-full"
+                    bounds={[[coordinates.lat, coordinates.lng]]}
                     zoom={15}
-                    style={{ height: '100%', width: '100%' }}
                     scrollWheelZoom={false}
                   >
                     <TileLayer
