@@ -59,23 +59,13 @@ const MediaCaptureSection = () => {
   };
 
   const handleSend = () => {
-    // Send media data to CIODES page through state
+    toast.success("Informações enviadas ao CIODES!");
     navigate("/ciodes", { 
       state: { 
         mediaItems,
         textContent 
       }
     });
-    
-    // Immediately redirect to solicitante-esperando
-    navigate("/solicitante-esperando", { 
-      state: { 
-        mediaItems,
-        textContent 
-      }
-    });
-    
-    toast.success("Informações enviadas ao CIODES!");
   };
 
   return (
