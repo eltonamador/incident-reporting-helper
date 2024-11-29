@@ -28,7 +28,6 @@ const CIODES = () => {
   const [selectedGBM, setSelectedGBM] = useState("");
   const [coordinates, setCoordinates] = useState<{lat: number, lng: number} | null>(null);
 
-  // Get current location
   const getLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -93,6 +92,7 @@ const CIODES = () => {
                     center={[coordinates.lat, coordinates.lng]}
                     zoom={15}
                     style={{ height: '100%', width: '100%' }}
+                    scrollWheelZoom={false}
                   >
                     <TileLayer
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
