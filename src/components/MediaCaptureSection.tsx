@@ -11,9 +11,12 @@ const MediaCaptureSection = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [mediaType, setMediaType] = useState<"video" | "image" | "audio" | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const stopMediaStream = () => {
     if (mediaStream) {
@@ -30,6 +33,8 @@ const MediaCaptureSection = () => {
     try {
       stopMediaStream();
       setShowTextInput(false);
+      setPreviewUrl(null);
+      setMediaType(null);
 
       if (type === "texto") {
         setShowTextInput(true);
@@ -63,6 +68,22 @@ const MediaCaptureSection = () => {
         setIsRecording(true);
         setMediaStream(stream);
         
+        const chunks: Blob[] = [];
+        mediaRecorderRef.current.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            chunks.push(event.data);
+          }
+        };
+
+        mediaRecorderRef.current.onstop = () => {
+          const blob = new Blob(chunks, { type: 'audio/webm' });
+          const url = URL.createObjectURL(blob);
+          setPreviewUrl(url);
+          setMediaType("audio");
+          setIsRecording(false);
+          toast.success("Áudio gravado com sucesso!");
+        };
+
         mediaRecorderRef.current.start();
         toast.info("Gravando áudio...");
       }
@@ -74,6 +95,9 @@ const MediaCaptureSection = () => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+      setMediaType(file.type.startsWith('video') ? "video" : "image");
       const type = file.type.startsWith('video') ? 'vídeo' : 'foto';
       toast.success(`${type} capturado com sucesso!`);
     }
@@ -87,6 +111,8 @@ const MediaCaptureSection = () => {
     setShowTextInput(false);
     setTextContent("");
     setIsRecording(false);
+    setPreviewUrl(null);
+    setMediaType(null);
     toast.success("Informações enviadas ao CIODES!");
   };
 
@@ -133,14 +159,30 @@ const MediaCaptureSection = () => {
         </button>
       </div>
 
-      {(mediaStream || showTextInput) && (
+      {(mediaStream || showTextInput || previewUrl) && (
         <div className="space-y-4 border rounded-lg p-4">
-          {(mediaStream && videoRef) && (
+          {mediaType === "video" && previewUrl && (
             <video
-              ref={videoRef}
-              autoPlay
-              playsInline
+              src={previewUrl}
+              controls
               className="w-full rounded-lg"
+            />
+          )}
+          
+          {mediaType === "image" && previewUrl && (
+            <img
+              src={previewUrl}
+              alt="Foto capturada"
+              className="w-full rounded-lg"
+            />
+          )}
+          
+          {mediaType === "audio" && previewUrl && (
+            <audio
+              ref={audioRef}
+              src={previewUrl}
+              controls
+              className="w-full"
             />
           )}
           
