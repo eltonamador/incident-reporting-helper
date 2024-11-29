@@ -1,91 +1,36 @@
 import { Video, Image, Mic, Send, Text } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useRef } from "react";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
+import MediaPreviewList from "./MediaPreviewList";
+import AudioRecorder from "./AudioRecorder";
+
+interface MediaItem {
+  type: "video" | "image" | "audio";
+  url: string;
+}
 
 const MediaCaptureSection = () => {
   const [showTextInput, setShowTextInput] = useState(false);
   const [textContent, setTextContent] = useState("");
-  const [isRecording, setIsRecording] = useState(false);
-  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
-  const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [mediaType, setMediaType] = useState<"video" | "image" | "audio" | null>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
-
-  const stopMediaStream = () => {
-    if (mediaStream) {
-      mediaStream.getTracks().forEach(track => track.stop());
-      setMediaStream(null);
-    }
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
-    setRecordedChunks([]);
-  };
 
   const handleCapture = async (type: string) => {
     try {
-      stopMediaStream();
       setShowTextInput(false);
-      setPreviewUrl(null);
-      setMediaType(null);
 
       if (type === "texto") {
         setShowTextInput(true);
         return;
       }
 
-      if (type === "vídeo") {
+      if (type === "vídeo" || type === "foto") {
         if (fileInputRef.current) {
-          fileInputRef.current.accept = "video/*";
+          fileInputRef.current.accept = type === "vídeo" ? "video/*" : "image/*";
           fileInputRef.current.capture = "environment";
           fileInputRef.current.click();
         }
-        return;
-      }
-
-      let stream: MediaStream;
-      
-      if (type === "foto") {
-        if (fileInputRef.current) {
-          fileInputRef.current.accept = "image/*";
-          fileInputRef.current.capture = "environment";
-          fileInputRef.current.click();
-        }
-        return;
-      } else if (type === "áudio") {
-        stream = await navigator.mediaDevices.getUserMedia({
-          audio: true
-        });
-        
-        mediaRecorderRef.current = new MediaRecorder(stream);
-        setIsRecording(true);
-        setMediaStream(stream);
-        
-        const chunks: Blob[] = [];
-        mediaRecorderRef.current.ondataavailable = (event) => {
-          if (event.data.size > 0) {
-            chunks.push(event.data);
-          }
-        };
-
-        mediaRecorderRef.current.onstop = () => {
-          const blob = new Blob(chunks, { type: 'audio/webm' });
-          const url = URL.createObjectURL(blob);
-          setPreviewUrl(url);
-          setMediaType("audio");
-          setIsRecording(false);
-          toast.success("Áudio gravado com sucesso!");
-        };
-
-        mediaRecorderRef.current.start();
-        toast.info("Gravando áudio...");
       }
     } catch (error) {
       toast.error(`Erro ao acessar dispositivo: ${error}`);
@@ -96,23 +41,25 @@ const MediaCaptureSection = () => {
     const file = event.target.files?.[0];
     if (file) {
       const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
-      setMediaType(file.type.startsWith('video') ? "video" : "image");
-      const type = file.type.startsWith('video') ? 'vídeo' : 'foto';
-      toast.success(`${type} capturado com sucesso!`);
+      const type = file.type.startsWith('video') ? "video" : "image";
+      setMediaItems(prev => [...prev, { type, url }]);
+      const typeLabel = type === "video" ? 'vídeo' : 'foto';
+      toast.success(`${typeLabel} capturado com sucesso!`);
     }
   };
 
+  const handleAudioComplete = (url: string) => {
+    setMediaItems(prev => [...prev, { type: "audio", url }]);
+  };
+
+  const handleRemoveMedia = (index: number) => {
+    setMediaItems(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleSend = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
-      mediaRecorderRef.current.stop();
-    }
-    stopMediaStream();
     setShowTextInput(false);
     setTextContent("");
-    setIsRecording(false);
-    setPreviewUrl(null);
-    setMediaType(null);
+    setMediaItems([]);
     toast.success("Informações enviadas ao CIODES!");
   };
 
@@ -159,33 +106,8 @@ const MediaCaptureSection = () => {
         </button>
       </div>
 
-      {(mediaStream || showTextInput || previewUrl) && (
+      {(showTextInput || mediaItems.length > 0) && (
         <div className="space-y-4 border rounded-lg p-4">
-          {mediaType === "video" && previewUrl && (
-            <video
-              src={previewUrl}
-              controls
-              className="w-full rounded-lg"
-            />
-          )}
-          
-          {mediaType === "image" && previewUrl && (
-            <img
-              src={previewUrl}
-              alt="Foto capturada"
-              className="w-full rounded-lg"
-            />
-          )}
-          
-          {mediaType === "audio" && previewUrl && (
-            <audio
-              ref={audioRef}
-              src={previewUrl}
-              controls
-              className="w-full"
-            />
-          )}
-          
           {showTextInput && (
             <Textarea
               value={textContent}
@@ -194,8 +116,17 @@ const MediaCaptureSection = () => {
               className="w-full"
             />
           )}
+          
+          {mediaItems.length > 0 && (
+            <MediaPreviewList 
+              mediaItems={mediaItems}
+              onRemove={handleRemoveMedia}
+            />
+          )}
         </div>
       )}
+
+      <AudioRecorder onRecordingComplete={handleAudioComplete} />
 
       <button
         onClick={handleSend}
