@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
+import { LatLngExpression } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -60,6 +61,11 @@ const CIODES_Recebimento = () => {
   const videoItems = location.state?.mediaItems?.filter((item: any) => item.type === "video") || [];
   const imageItems = location.state?.mediaItems?.filter((item: any) => item.type === "image") || [];
   const audioItems = location.state?.mediaItems?.filter((item: any) => item.type === "audio") || [];
+
+  // Convert coordinates to LatLngExpression for the map
+  const mapCenter: LatLngExpression | undefined = coordinates 
+    ? [coordinates.lat, coordinates.lng]
+    : undefined;
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
@@ -144,17 +150,17 @@ const CIODES_Recebimento = () => {
                   : "Obter Localização"}
               </Button>
               
-              {coordinates && (
+              {coordinates && mapCenter && (
                 <div className="h-[200px] w-full rounded-lg overflow-hidden border border-gray-200">
                   <MapContainer
-                    center={[coordinates.lat, coordinates.lng]}
+                    center={mapCenter}
                     className="h-full w-full"
                     zoom={13}
                   >
                     <TileLayer
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
-                    <Marker position={[coordinates.lat, coordinates.lng]} />
+                    <Marker position={mapCenter} />
                   </MapContainer>
                 </div>
               )}
