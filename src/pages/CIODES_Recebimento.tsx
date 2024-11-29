@@ -15,7 +15,6 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { LatLngExpression } from "leaflet";
 
-// Fix leaflet icon issue
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -90,8 +89,7 @@ const CIODES = () => {
               {coordinates && (
                 <div className="h-[200px] w-full rounded-lg overflow-hidden border border-gray-200">
                   <MapContainer
-                    key={`${coordinates.lat}-${coordinates.lng}`}
-                    center={coordinates as L.LatLngExpression}
+                    center={[coordinates.lat, coordinates.lng] as LatLngExpression}
                     zoom={13}
                     scrollWheelZoom={false}
                     style={{ height: '100%', width: '100%' }}
@@ -99,7 +97,7 @@ const CIODES = () => {
                     <TileLayer
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
-                    <Marker position={coordinates as L.LatLngExpression} />
+                    <Marker position={[coordinates.lat, coordinates.lng]} />
                   </MapContainer>
                 </div>
               )}
