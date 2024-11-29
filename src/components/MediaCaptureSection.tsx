@@ -13,6 +13,7 @@ const MediaCaptureSection = () => {
   const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const stopMediaStream = () => {
     if (mediaStream) {
@@ -35,54 +36,24 @@ const MediaCaptureSection = () => {
         return;
       }
 
+      if (type === "vídeo") {
+        if (fileInputRef.current) {
+          fileInputRef.current.accept = "video/*";
+          fileInputRef.current.capture = "environment";
+          fileInputRef.current.click();
+        }
+        return;
+      }
+
       let stream: MediaStream;
       
-      if (type === "vídeo") {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: 'environment'
-          },
-          audio: true
-        });
-        
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
+      if (type === "foto") {
+        if (fileInputRef.current) {
+          fileInputRef.current.accept = "image/*";
+          fileInputRef.current.capture = "environment";
+          fileInputRef.current.click();
         }
-
-        setMediaStream(stream);
-        
-        const mediaRecorder = new MediaRecorder(stream);
-        mediaRecorderRef.current = mediaRecorder;
-        
-        const chunks: Blob[] = [];
-        mediaRecorder.ondataavailable = (event) => {
-          if (event.data.size > 0) {
-            chunks.push(event.data);
-          }
-        };
-
-        mediaRecorder.onstop = () => {
-          const blob = new Blob(chunks, { type: 'video/webm' });
-          setRecordedChunks(chunks);
-          stopMediaStream();
-          toast.success("Vídeo capturado com sucesso!");
-        };
-
-        mediaRecorder.start();
-        setIsRecording(true);
-        toast.info("Gravando vídeo...");
-      } else if (type === "foto") {
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: 'environment'
-          }
-        });
-        
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-        setMediaStream(stream);
-        toast.info("Capturando foto...");
+        return;
       } else if (type === "áudio") {
         stream = await navigator.mediaDevices.getUserMedia({
           audio: true
@@ -100,6 +71,14 @@ const MediaCaptureSection = () => {
     }
   };
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const type = file.type.startsWith('video') ? 'vídeo' : 'foto';
+      toast.success(`${type} capturado com sucesso!`);
+    }
+  };
+
   const handleSend = () => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
       mediaRecorderRef.current.stop();
@@ -113,6 +92,13 @@ const MediaCaptureSection = () => {
 
   return (
     <div className="w-full space-y-4 mt-6">
+      <input
+        type="file"
+        ref={fileInputRef}
+        className="hidden"
+        onChange={handleFileChange}
+        capture="environment"
+      />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <button
           onClick={() => handleCapture("vídeo")}
