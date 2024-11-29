@@ -1,6 +1,7 @@
 import { Video, Image, Mic, Send, Text } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Textarea } from "./ui/textarea";
 import MediaPreviewList from "./MediaPreviewList";
 import AudioRecorder from "./AudioRecorder";
@@ -10,7 +11,8 @@ interface MediaItem {
   url: string;
 }
 
-const MediaCaptureSection = () => {
+const MediaCaptureSection = ({ selectedEmergency }: { selectedEmergency: string | null }) => {
+  const navigate = useNavigate();
   const [showTextInput, setShowTextInput] = useState(false);
   const [textContent, setTextContent] = useState("");
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
@@ -57,10 +59,17 @@ const MediaCaptureSection = () => {
   };
 
   const handleSend = () => {
-    setShowTextInput(false);
-    setTextContent("");
-    setMediaItems([]);
-    toast.success("Informações enviadas ao CIODES!");
+    if (!selectedEmergency) {
+      toast.error("Selecione o tipo de ocorrência primeiro!");
+      return;
+    }
+
+    navigate("/ciodes", {
+      state: {
+        emergencyType: selectedEmergency,
+        mediaItems: mediaItems,
+      },
+    });
   };
 
   return (
