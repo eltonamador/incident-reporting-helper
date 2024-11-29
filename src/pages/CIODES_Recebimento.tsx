@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
-import MediaPreviewList from "@/components/MediaPreviewList";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -22,11 +21,18 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-const CIODES = () => {
+const CIODES_Recebimento = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedGBM, setSelectedGBM] = useState("");
   const [coordinates, setCoordinates] = useState<{lat: number, lng: number} | null>(null);
+
+  const mediaItems = location.state?.mediaItems || [];
+  const textContent = location.state?.textContent || "";
+
+  const videoItems = mediaItems.filter(item => item.type === "video");
+  const imageItems = mediaItems.filter(item => item.type === "image");
+  const audioItems = mediaItems.filter(item => item.type === "audio");
 
   const getLocation = () => {
     if (navigator.geolocation) {
@@ -89,9 +95,9 @@ const CIODES = () => {
               {coordinates && (
                 <div className="h-[200px] w-full rounded-lg overflow-hidden border border-gray-200">
                   <MapContainer
-                    className="h-full w-full"
                     center={[coordinates.lat, coordinates.lng] as LatLngExpression}
                     zoom={13}
+                    className="h-full w-full"
                   >
                     <TileLayer
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -120,15 +126,50 @@ const CIODES = () => {
               </Select>
             </div>
 
-            {location.state?.mediaItems && (
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Mídias Anexadas
-                </label>
-                <MediaPreviewList 
-                  mediaItems={location.state.mediaItems} 
-                  onRemove={() => {}} 
-                />
+            {/* Containers for different media types */}
+            {videoItems.length > 0 && (
+              <div className="border rounded-lg p-4">
+                <h3 className="font-medium mb-3">Vídeos</h3>
+                <div className="space-y-4">
+                  {videoItems.map((item, index) => (
+                    <div key={`video-${index}`}>
+                      <video src={item.url} controls className="w-full rounded-lg" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {imageItems.length > 0 && (
+              <div className="border rounded-lg p-4">
+                <h3 className="font-medium mb-3">Fotos</h3>
+                <div className="space-y-4">
+                  {imageItems.map((item, index) => (
+                    <div key={`image-${index}`}>
+                      <img src={item.url} alt={`Imagem ${index + 1}`} className="w-full rounded-lg" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {audioItems.length > 0 && (
+              <div className="border rounded-lg p-4">
+                <h3 className="font-medium mb-3">Áudios</h3>
+                <div className="space-y-4">
+                  {audioItems.map((item, index) => (
+                    <div key={`audio-${index}`}>
+                      <audio src={item.url} controls className="w-full" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {textContent && (
+              <div className="border rounded-lg p-4">
+                <h3 className="font-medium mb-3">Texto</h3>
+                <p className="text-gray-700">{textContent}</p>
               </div>
             )}
 
@@ -145,4 +186,4 @@ const CIODES = () => {
   );
 };
 
-export default CIODES;
+export default CIODES_Recebimento;
