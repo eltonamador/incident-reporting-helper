@@ -89,8 +89,8 @@ const CIODES = () => {
                 <div className="h-[200px] w-full rounded-lg overflow-hidden border border-gray-200">
                   <MapContainer
                     className="h-full w-full"
-                    bounds={[[coordinates.lat, coordinates.lng]]}
-                    scrollWheelZoom={false}
+                    center={[coordinates.lat, coordinates.lng]}
+                    zoom={13}
                   >
                     <TileLayer
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
