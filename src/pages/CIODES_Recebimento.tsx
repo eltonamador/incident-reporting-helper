@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
+import MediaPreviewList from "@/components/MediaPreviewList";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -12,8 +13,8 @@ import {
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { LatLngExpression } from "leaflet";
 
+// Fix Leaflet icon issue
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -26,13 +27,6 @@ const CIODES_Recebimento = () => {
   const location = useLocation();
   const [selectedGBM, setSelectedGBM] = useState("");
   const [coordinates, setCoordinates] = useState<{lat: number, lng: number} | null>(null);
-
-  const mediaItems = location.state?.mediaItems || [];
-  const textContent = location.state?.textContent || "";
-
-  const videoItems = mediaItems.filter(item => item.type === "video");
-  const imageItems = mediaItems.filter(item => item.type === "image");
-  const audioItems = mediaItems.filter(item => item.type === "audio");
 
   const getLocation = () => {
     if (navigator.geolocation) {
@@ -69,7 +63,8 @@ const CIODES_Recebimento = () => {
           <h2 className="text-xl font-bold mb-4">Detalhes da Ocorrência</h2>
           
           <div className="space-y-4">
-            <div>
+            {/* Emergency Type Section */}
+            <div className="border-b pb-4">
               <label className="block text-sm font-medium mb-2">
                 Tipo de Ocorrência
               </label>
@@ -78,6 +73,32 @@ const CIODES_Recebimento = () => {
               </div>
             </div>
 
+            {/* Text Content Section */}
+            {location.state?.textContent && (
+              <div className="border-b pb-4">
+                <label className="block text-sm font-medium mb-2">
+                  Descrição da Ocorrência
+                </label>
+                <div className="p-3 bg-gray-100 rounded">
+                  {location.state.textContent}
+                </div>
+              </div>
+            )}
+
+            {/* Media Items Section */}
+            {location.state?.mediaItems && location.state.mediaItems.length > 0 && (
+              <div className="border-b pb-4">
+                <label className="block text-sm font-medium mb-2">
+                  Mídias Anexadas
+                </label>
+                <MediaPreviewList 
+                  mediaItems={location.state.mediaItems} 
+                  onRemove={() => {}} 
+                />
+              </div>
+            )}
+
+            {/* Location Section */}
             <div>
               <label className="block text-sm font-medium mb-2">
                 Localização
@@ -95,9 +116,8 @@ const CIODES_Recebimento = () => {
               {coordinates && (
                 <div className="h-[200px] w-full rounded-lg overflow-hidden border border-gray-200">
                   <MapContainer
-                    center={[coordinates.lat, coordinates.lng] as LatLngExpression}
-                    zoom={13}
                     className="h-full w-full"
+                    zoom={13}
                   >
                     <TileLayer
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -108,6 +128,7 @@ const CIODES_Recebimento = () => {
               )}
             </div>
 
+            {/* GBM Selection */}
             <div>
               <label className="block text-sm font-medium mb-2">
                 Selecione o GBM
@@ -125,53 +146,6 @@ const CIODES_Recebimento = () => {
                 </SelectContent>
               </Select>
             </div>
-
-            {/* Containers for different media types */}
-            {videoItems.length > 0 && (
-              <div className="border rounded-lg p-4">
-                <h3 className="font-medium mb-3">Vídeos</h3>
-                <div className="space-y-4">
-                  {videoItems.map((item, index) => (
-                    <div key={`video-${index}`}>
-                      <video src={item.url} controls className="w-full rounded-lg" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {imageItems.length > 0 && (
-              <div className="border rounded-lg p-4">
-                <h3 className="font-medium mb-3">Fotos</h3>
-                <div className="space-y-4">
-                  {imageItems.map((item, index) => (
-                    <div key={`image-${index}`}>
-                      <img src={item.url} alt={`Imagem ${index + 1}`} className="w-full rounded-lg" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {audioItems.length > 0 && (
-              <div className="border rounded-lg p-4">
-                <h3 className="font-medium mb-3">Áudios</h3>
-                <div className="space-y-4">
-                  {audioItems.map((item, index) => (
-                    <div key={`audio-${index}`}>
-                      <audio src={item.url} controls className="w-full" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {textContent && (
-              <div className="border rounded-lg p-4">
-                <h3 className="font-medium mb-3">Texto</h3>
-                <p className="text-gray-700">{textContent}</p>
-              </div>
-            )}
 
             <Button 
               onClick={handleSendToGBM}
