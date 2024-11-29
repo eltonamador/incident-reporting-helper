@@ -64,7 +64,6 @@ const MediaCaptureSection = () => {
             autoPlay
             playsInline
             className="max-w-full max-h-full"
-            style={{ transform: 'scaleX(-1)' }}
           />
           <div className="absolute bottom-4 text-white text-center w-full">
             Toque na tela para tirar a foto
