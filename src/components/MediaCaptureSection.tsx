@@ -1,4 +1,4 @@
-import { Video, Image, Mic, Send } from "lucide-react";
+import { Video, Image, Mic, Send, Text } from "lucide-react";
 import { toast } from "sonner";
 
 const MediaCaptureSection = () => {
@@ -13,7 +13,7 @@ const MediaCaptureSection = () => {
 
   return (
     <div className="w-full space-y-4 mt-6">
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <button
           onClick={() => handleCapture("vídeo")}
           className="flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow hover:bg-gray-50 transition-colors gap-2 border border-gray-200"
@@ -36,6 +36,14 @@ const MediaCaptureSection = () => {
         >
           <Mic className="w-6 h-6 text-emergency" />
           <span className="text-sm">Áudio</span>
+        </button>
+
+        <button
+          onClick={() => handleCapture("texto")}
+          className="flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow hover:bg-gray-50 transition-colors gap-2 border border-gray-200"
+        >
+          <Text className="w-6 h-6 text-emergency" />
+          <span className="text-sm">Texto</span>
         </button>
       </div>
 

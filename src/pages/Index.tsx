@@ -1,21 +1,26 @@
-import { FireExtinguisher, Ambulance } from "lucide-react";
+import { FireExtinguisher, TreePine, Building2, ArrowUpFromLine, Car, LifeBuoy, HelpCircle, Text } from "lucide-react";
 import EmergencyTypeButton from "@/components/EmergencyTypeButton";
 import MediaCaptureSection from "@/components/MediaCaptureSection";
 import { toast } from "sonner";
+import { useState } from "react";
 
 const Index = () => {
+  const [selectedEmergency, setSelectedEmergency] = useState<string | null>(null);
+
   const handleEmergencySelect = (type: string) => {
+    setSelectedEmergency(type);
     toast.info(`Tipo de ocorrência selecionado: ${type}`);
   };
 
   const emergencyTypes = [
-    { icon: FireExtinguisher, label: "Incêndio em casas ou comércio" },
-    { icon: Ambulance, label: "Salvamento envolvendo altura" },
-    { icon: Ambulance, label: "Acidente de trânsito com vítimas" },
-    { icon: Ambulance, label: "Salvamentos em Geral" },
-    { icon: Ambulance, label: "Tentativa de Suicídio" },
-    { icon: Ambulance, label: "Afogamento" },
-    { icon: Ambulance, label: "Outros" },
+    { icon: Building2, label: "Incêndio em casas ou comércio" },
+    { icon: TreePine, label: "Incêndio em Vegetação" },
+    { icon: ArrowUpFromLine, label: "Salvamento envolvendo altura" },
+    { icon: Car, label: "Acidente de trânsito com vítimas" },
+    { icon: FireExtinguisher, label: "Salvamentos em Geral" },
+    { icon: HelpCircle, label: "Tentativa de Suicídio" },
+    { icon: LifeBuoy, label: "Afogamento" },
+    { icon: HelpCircle, label: "Outros" },
   ];
 
   return (
@@ -33,6 +38,7 @@ const Index = () => {
               icon={type.icon}
               label={type.label}
               onClick={() => handleEmergencySelect(type.label)}
+              isSelected={selectedEmergency === type.label}
             />
           ))}
         </div>
