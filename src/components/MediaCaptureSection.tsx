@@ -10,6 +10,7 @@ const MediaCaptureSection = () => {
   const [textContent, setTextContent] = useState("");
   const [isRecording, setIsRecording] = useState(false);
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
+  const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
 
@@ -21,11 +22,11 @@ const MediaCaptureSection = () => {
     if (videoRef.current) {
       videoRef.current.srcObject = null;
     }
+    setRecordedChunks([]);
   };
 
   const handleCapture = async (type: string) => {
     try {
-      // Stop any existing streams first
       stopMediaStream();
       setShowTextInput(false);
 
@@ -36,15 +37,52 @@ const MediaCaptureSection = () => {
 
       let stream: MediaStream;
       
-      if (type === "vídeo" || type === "foto") {
+      if (type === "vídeo") {
         stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: type === "vídeo"
+          video: {
+            facingMode: 'environment'
+          },
+          audio: true
         });
         
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
+
+        setMediaStream(stream);
+        
+        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorderRef.current = mediaRecorder;
+        
+        const chunks: Blob[] = [];
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            chunks.push(event.data);
+          }
+        };
+
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(chunks, { type: 'video/webm' });
+          setRecordedChunks(chunks);
+          stopMediaStream();
+          toast.success("Vídeo capturado com sucesso!");
+        };
+
+        mediaRecorder.start();
+        setIsRecording(true);
+        toast.info("Gravando vídeo...");
+      } else if (type === "foto") {
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: 'environment'
+          }
+        });
+        
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+        setMediaStream(stream);
+        toast.info("Capturando foto...");
       } else if (type === "áudio") {
         stream = await navigator.mediaDevices.getUserMedia({
           audio: true
@@ -52,25 +90,24 @@ const MediaCaptureSection = () => {
         
         mediaRecorderRef.current = new MediaRecorder(stream);
         setIsRecording(true);
+        setMediaStream(stream);
         
         mediaRecorderRef.current.start();
         toast.info("Gravando áudio...");
       }
-
-      toast.info(`Capturando ${type}...`);
     } catch (error) {
       toast.error(`Erro ao acessar dispositivo: ${error}`);
     }
   };
 
   const handleSend = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+      mediaRecorderRef.current.stop();
+    }
     stopMediaStream();
     setShowTextInput(false);
     setTextContent("");
     setIsRecording(false);
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
-      mediaRecorderRef.current.stop();
-    }
     toast.success("Informações enviadas ao CIODES!");
   };
 
