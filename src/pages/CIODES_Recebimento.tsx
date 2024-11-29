@@ -11,7 +11,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
-import { LatLngExpression } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -62,11 +61,6 @@ const CIODES_Recebimento = () => {
   const imageItems = location.state?.mediaItems?.filter((item: any) => item.type === "image") || [];
   const audioItems = location.state?.mediaItems?.filter((item: any) => item.type === "audio") || [];
 
-  // Convert coordinates to LatLngExpression for the map
-  const mapCenter: LatLngExpression | undefined = coordinates 
-    ? [coordinates.lat, coordinates.lng]
-    : undefined;
-
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-lg mx-auto space-y-6">
@@ -84,45 +78,6 @@ const CIODES_Recebimento = () => {
               </div>
             </div>
 
-            {/* Media Sections */}
-            {(videoItems.length > 0 || imageItems.length > 0 || audioItems.length > 0) && (
-              <div className="border-b pb-4">
-                <h3 className="text-sm font-medium text-gray-600 mb-4">
-                  Mídias Anexadas
-                </h3>
-                
-                {videoItems.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="text-sm text-gray-500 mb-2">Vídeos</h4>
-                    <MediaPreviewList 
-                      mediaItems={videoItems}
-                      onRemove={() => {}}
-                    />
-                  </div>
-                )}
-
-                {imageItems.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="text-sm text-gray-500 mb-2">Fotos</h4>
-                    <MediaPreviewList 
-                      mediaItems={imageItems}
-                      onRemove={() => {}}
-                    />
-                  </div>
-                )}
-
-                {audioItems.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="text-sm text-gray-500 mb-2">Áudios</h4>
-                    <MediaPreviewList 
-                      mediaItems={audioItems}
-                      onRemove={() => {}}
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-
             {/* Text Content Section */}
             {location.state?.textContent && (
               <div className="border-b pb-4">
@@ -132,6 +87,45 @@ const CIODES_Recebimento = () => {
                 <div className="p-3 bg-gray-100 rounded">
                   {location.state.textContent}
                 </div>
+              </div>
+            )}
+
+            {/* Videos Section */}
+            {videoItems.length > 0 && (
+              <div className="border-b pb-4">
+                <h3 className="text-sm font-medium text-gray-600 mb-2">
+                  Vídeos
+                </h3>
+                <MediaPreviewList 
+                  mediaItems={videoItems}
+                  onRemove={() => {}}
+                />
+              </div>
+            )}
+
+            {/* Images Section */}
+            {imageItems.length > 0 && (
+              <div className="border-b pb-4">
+                <h3 className="text-sm font-medium text-gray-600 mb-2">
+                  Fotos
+                </h3>
+                <MediaPreviewList 
+                  mediaItems={imageItems}
+                  onRemove={() => {}}
+                />
+              </div>
+            )}
+
+            {/* Audio Section */}
+            {audioItems.length > 0 && (
+              <div className="border-b pb-4">
+                <h3 className="text-sm font-medium text-gray-600 mb-2">
+                  Áudios
+                </h3>
+                <MediaPreviewList 
+                  mediaItems={audioItems}
+                  onRemove={() => {}}
+                />
               </div>
             )}
 
@@ -150,17 +144,16 @@ const CIODES_Recebimento = () => {
                   : "Obter Localização"}
               </Button>
               
-              {coordinates && mapCenter && (
+              {coordinates && (
                 <div className="h-[200px] w-full rounded-lg overflow-hidden border border-gray-200">
                   <MapContainer
-                    center={mapCenter}
                     className="h-full w-full"
                     zoom={13}
                   >
                     <TileLayer
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
-                    <Marker position={mapCenter} />
+                    <Marker position={[coordinates.lat, coordinates.lng]} />
                   </MapContainer>
                 </div>
               )}
