@@ -13,6 +13,7 @@ import {
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { LatLngExpression } from 'leaflet';
 
 // Fix Leaflet icon issue
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -60,6 +61,9 @@ const CIODES_Recebimento = () => {
   const videoItems = location.state?.mediaItems?.filter((item: any) => item.type === "video") || [];
   const imageItems = location.state?.mediaItems?.filter((item: any) => item.type === "image") || [];
   const audioItems = location.state?.mediaItems?.filter((item: any) => item.type === "audio") || [];
+
+  // Create center coordinates as LatLngExpression
+  const center: LatLngExpression = coordinates ? [coordinates.lat, coordinates.lng] : [-20.2976, -40.2928];
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
@@ -136,14 +140,14 @@ const CIODES_Recebimento = () => {
               {coordinates && (
                 <div className="h-[200px] w-full rounded-lg overflow-hidden border border-gray-200">
                   <MapContainer
-                    className="h-full w-full"
-                    center={[coordinates.lat, coordinates.lng]}
+                    center={center}
                     zoom={13}
+                    className="h-full w-full"
                   >
                     <TileLayer
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
-                    <Marker position={[coordinates.lat, coordinates.lng]} />
+                    <Marker position={center} />
                   </MapContainer>
                 </div>
               )}
