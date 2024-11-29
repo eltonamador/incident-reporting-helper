@@ -13,8 +13,8 @@ import {
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { LatLngExpression } from "leaflet";
 
-// Fix Leaflet icon issue
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -22,7 +22,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-const CIODES_Recebimento = () => {
+const CIODES = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedGBM, setSelectedGBM] = useState("");
@@ -56,73 +56,26 @@ const CIODES_Recebimento = () => {
     navigate("/");
   };
 
-  // Filter media items by type
-  const videoItems = location.state?.mediaItems?.filter((item: any) => item.type === "video") || [];
-  const imageItems = location.state?.mediaItems?.filter((item: any) => item.type === "image") || [];
-  const audioItems = location.state?.mediaItems?.filter((item: any) => item.type === "audio") || [];
-
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-lg mx-auto space-y-6">
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-bold mb-4">Detalhes da Ocorrência</h2>
           
-          <div className="space-y-6">
-            {/* Text Content Section */}
-            {location.state?.textContent && (
-              <div className="border-b pb-4">
-                <h3 className="text-sm font-medium text-gray-600 mb-2">
-                  Descrição da Ocorrência
-                </h3>
-                <div className="p-3 bg-gray-100 rounded">
-                  {location.state.textContent}
-                </div>
-              </div>
-            )}
-
-            {/* Media Section */}
-            {(videoItems.length > 0 || imageItems.length > 0 || audioItems.length > 0) && (
-              <div className="border-b pb-4">
-                <h3 className="text-sm font-medium text-gray-600 mb-2">
-                  Mídias Anexadas
-                </h3>
-                {videoItems.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="text-sm text-gray-500 mb-2">Vídeos</h4>
-                    <MediaPreviewList 
-                      mediaItems={videoItems}
-                      onRemove={() => {}}
-                    />
-                  </div>
-                )}
-                
-                {imageItems.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="text-sm text-gray-500 mb-2">Fotos</h4>
-                    <MediaPreviewList 
-                      mediaItems={imageItems}
-                      onRemove={() => {}}
-                    />
-                  </div>
-                )}
-                
-                {audioItems.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="text-sm text-gray-500 mb-2">Áudios</h4>
-                    <MediaPreviewList 
-                      mediaItems={audioItems}
-                      onRemove={() => {}}
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Location Section */}
+          <div className="space-y-4">
             <div>
-              <h3 className="text-sm font-medium text-gray-600 mb-2">
+              <label className="block text-sm font-medium mb-2">
+                Tipo de Ocorrência
+              </label>
+              <div className="p-3 bg-gray-100 rounded">
+                {location.state?.emergencyType || "Não especificado"}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">
                 Localização
-              </h3>
+              </label>
               <Button 
                 onClick={getLocation}
                 className="w-full mb-4"
@@ -137,6 +90,7 @@ const CIODES_Recebimento = () => {
                 <div className="h-[200px] w-full rounded-lg overflow-hidden border border-gray-200">
                   <MapContainer
                     className="h-full w-full"
+                    center={[coordinates.lat, coordinates.lng] as LatLngExpression}
                     zoom={13}
                   >
                     <TileLayer
@@ -148,11 +102,10 @@ const CIODES_Recebimento = () => {
               )}
             </div>
 
-            {/* GBM Selection */}
             <div>
-              <h3 className="text-sm font-medium text-gray-600 mb-2">
+              <label className="block text-sm font-medium mb-2">
                 Selecione o GBM
-              </h3>
+              </label>
               <Select onValueChange={setSelectedGBM}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione um GBM" />
@@ -167,6 +120,18 @@ const CIODES_Recebimento = () => {
               </Select>
             </div>
 
+            {location.state?.mediaItems && (
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Mídias Anexadas
+                </label>
+                <MediaPreviewList 
+                  mediaItems={location.state.mediaItems} 
+                  onRemove={() => {}} 
+                />
+              </div>
+            )}
+
             <Button 
               onClick={handleSendToGBM}
               className="w-full bg-emergency hover:bg-emergency/90"
@@ -180,4 +145,4 @@ const CIODES_Recebimento = () => {
   );
 };
 
-export default CIODES_Recebimento;
+export default CIODES;
