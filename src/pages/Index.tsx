@@ -1,4 +1,4 @@
-import { FireExtinguisher, TreePine, Building2, ArrowUpFromLine, Car, LifeBuoy, HelpCircle } from "lucide-react";
+import { FireExtinguisher, TreePine, Building2, ArrowUpFromLine, Car, LifeBuoy, HelpCircle, Text } from "lucide-react";
 import EmergencyTypeButton from "@/components/EmergencyTypeButton";
 import MediaCaptureSection from "@/components/MediaCaptureSection";
 import { toast } from "sonner";
@@ -43,7 +43,7 @@ const Index = () => {
           ))}
         </div>
 
-        <MediaCaptureSection selectedEmergency={selectedEmergency} />
+        <MediaCaptureSection />
       </div>
     </div>
   );
