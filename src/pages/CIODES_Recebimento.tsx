@@ -56,18 +56,23 @@ const CIODES_Recebimento = () => {
     navigate("/");
   };
 
+  // Filter media items by type
+  const videoItems = location.state?.mediaItems?.filter((item: any) => item.type === "video") || [];
+  const imageItems = location.state?.mediaItems?.filter((item: any) => item.type === "image") || [];
+  const audioItems = location.state?.mediaItems?.filter((item: any) => item.type === "audio") || [];
+
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-lg mx-auto space-y-6">
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-xl font-bold mb-4">Detalhes da Ocorrência</h2>
           
-          <div className="space-y-4">
+          <div className="space-y-6">
             {/* Emergency Type Section */}
             <div className="border-b pb-4">
-              <label className="block text-sm font-medium mb-2">
+              <h3 className="text-sm font-medium text-gray-600 mb-2">
                 Tipo de Ocorrência
-              </label>
+              </h3>
               <div className="p-3 bg-gray-100 rounded">
                 {location.state?.emergencyType || "Não especificado"}
               </div>
@@ -76,33 +81,59 @@ const CIODES_Recebimento = () => {
             {/* Text Content Section */}
             {location.state?.textContent && (
               <div className="border-b pb-4">
-                <label className="block text-sm font-medium mb-2">
+                <h3 className="text-sm font-medium text-gray-600 mb-2">
                   Descrição da Ocorrência
-                </label>
+                </h3>
                 <div className="p-3 bg-gray-100 rounded">
                   {location.state.textContent}
                 </div>
               </div>
             )}
 
-            {/* Media Items Section */}
-            {location.state?.mediaItems && location.state.mediaItems.length > 0 && (
+            {/* Videos Section */}
+            {videoItems.length > 0 && (
               <div className="border-b pb-4">
-                <label className="block text-sm font-medium mb-2">
-                  Mídias Anexadas
-                </label>
+                <h3 className="text-sm font-medium text-gray-600 mb-2">
+                  Vídeos
+                </h3>
                 <MediaPreviewList 
-                  mediaItems={location.state.mediaItems} 
-                  onRemove={() => {}} 
+                  mediaItems={videoItems}
+                  onRemove={() => {}}
+                />
+              </div>
+            )}
+
+            {/* Images Section */}
+            {imageItems.length > 0 && (
+              <div className="border-b pb-4">
+                <h3 className="text-sm font-medium text-gray-600 mb-2">
+                  Fotos
+                </h3>
+                <MediaPreviewList 
+                  mediaItems={imageItems}
+                  onRemove={() => {}}
+                />
+              </div>
+            )}
+
+            {/* Audio Section */}
+            {audioItems.length > 0 && (
+              <div className="border-b pb-4">
+                <h3 className="text-sm font-medium text-gray-600 mb-2">
+                  Áudios
+                </h3>
+                <MediaPreviewList 
+                  mediaItems={audioItems}
+                  onRemove={() => {}}
                 />
               </div>
             )}
 
             {/* Location Section */}
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <h3 className="text-sm font-medium text-gray-600 mb-2">
                 Localização
-              </label>
+              </h3>
               <Button 
                 onClick={getLocation}
                 className="w-full mb-4"
@@ -130,9 +161,9 @@ const CIODES_Recebimento = () => {
 
             {/* GBM Selection */}
             <div>
-              <label className="block text-sm font-medium mb-2">
+              <h3 className="text-sm font-medium text-gray-600 mb-2">
                 Selecione o GBM
-              </label>
+              </h3>
               <Select onValueChange={setSelectedGBM}>
                 <SelectTrigger>
                   <SelectValue placeholder="Selecione um GBM" />
