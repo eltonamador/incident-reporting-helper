@@ -13,7 +13,7 @@ import {
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { LatLngExpression, Map as LeafletMap } from "leaflet";
+import { LatLngExpression } from "leaflet";
 
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -88,7 +88,7 @@ const CIODES = () => {
               
               {coordinates && (
                 <div className="h-[200px] w-full rounded-lg overflow-hidden border border-gray-200">
-                  <MapContainer<LeafletMap>
+                  <MapContainer
                     className="h-full w-full"
                     center={[coordinates.lat, coordinates.lng] as LatLngExpression}
                     zoom={13}
