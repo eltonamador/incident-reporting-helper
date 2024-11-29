@@ -137,6 +137,7 @@ const CIODES_Recebimento = () => {
                 <div className="h-[200px] w-full rounded-lg overflow-hidden border border-gray-200">
                   <MapContainer
                     className="h-full w-full"
+                    center={[coordinates.lat, coordinates.lng]}
                     zoom={13}
                   >
                     <TileLayer
