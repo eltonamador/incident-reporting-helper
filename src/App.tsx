@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Index from "./pages/Index";
 import Solicitante_Esperando from "./pages/Solicitante_Esperando";
 import CIODES_Recebimento from "./pages/CIODES_Recebimento";
+import Login from "./pages/Login";
 
 const queryClient = new QueryClient();
 

@@ -89,6 +89,7 @@ const CIODES = () => {
               {coordinates && (
                 <div className="h-[200px] w-full rounded-lg overflow-hidden border border-gray-200">
                   <MapContainer
+                    key={`${coordinates.lat}-${coordinates.lng}`}
                     center={[coordinates.lat, coordinates.lng] as LatLngExpression}
                     zoom={13}
                     scrollWheelZoom={false}
@@ -97,7 +98,7 @@ const CIODES = () => {
                     <TileLayer
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
-                    <Marker position={[coordinates.lat, coordinates.lng]} />
+                    <Marker position={[coordinates.lat, coordinates.lng] as LatLngExpression} />
                   </MapContainer>
                 </div>
               )}
