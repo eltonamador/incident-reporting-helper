@@ -1,6 +1,7 @@
 import { Video, Image, Mic, Send, Text } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { Textarea } from "./ui/textarea";
 import MediaPreviewList from "./MediaPreviewList";
 import AudioRecorder from "./AudioRecorder";
@@ -11,6 +12,7 @@ interface MediaItem {
 }
 
 const MediaCaptureSection = () => {
+  const navigate = useNavigate();
   const [showTextInput, setShowTextInput] = useState(false);
   const [textContent, setTextContent] = useState("");
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
@@ -57,10 +59,13 @@ const MediaCaptureSection = () => {
   };
 
   const handleSend = () => {
-    setShowTextInput(false);
-    setTextContent("");
-    setMediaItems([]);
     toast.success("Informações enviadas ao CIODES!");
+    navigate("/solicitante-esperando", { 
+      state: { 
+        mediaItems,
+        textContent 
+      }
+    });
   };
 
   return (
