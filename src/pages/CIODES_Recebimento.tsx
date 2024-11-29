@@ -13,8 +13,8 @@ import {
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import { LatLngExpression } from "leaflet";
 
+// Fix Leaflet icon issue
 delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -22,7 +22,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-const CIODES = () => {
+const CIODES_Recebimento = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedGBM, setSelectedGBM] = useState("");
@@ -63,7 +63,8 @@ const CIODES = () => {
           <h2 className="text-xl font-bold mb-4">Detalhes da Ocorrência</h2>
           
           <div className="space-y-4">
-            <div>
+            {/* Emergency Type Section */}
+            <div className="border-b pb-4">
               <label className="block text-sm font-medium mb-2">
                 Tipo de Ocorrência
               </label>
@@ -72,6 +73,32 @@ const CIODES = () => {
               </div>
             </div>
 
+            {/* Text Content Section */}
+            {location.state?.textContent && (
+              <div className="border-b pb-4">
+                <label className="block text-sm font-medium mb-2">
+                  Descrição da Ocorrência
+                </label>
+                <div className="p-3 bg-gray-100 rounded">
+                  {location.state.textContent}
+                </div>
+              </div>
+            )}
+
+            {/* Media Items Section */}
+            {location.state?.mediaItems && location.state.mediaItems.length > 0 && (
+              <div className="border-b pb-4">
+                <label className="block text-sm font-medium mb-2">
+                  Mídias Anexadas
+                </label>
+                <MediaPreviewList 
+                  mediaItems={location.state.mediaItems} 
+                  onRemove={() => {}} 
+                />
+              </div>
+            )}
+
+            {/* Location Section */}
             <div>
               <label className="block text-sm font-medium mb-2">
                 Localização
@@ -90,7 +117,6 @@ const CIODES = () => {
                 <div className="h-[200px] w-full rounded-lg overflow-hidden border border-gray-200">
                   <MapContainer
                     className="h-full w-full"
-                    center={[coordinates.lat, coordinates.lng] as LatLngExpression}
                     zoom={13}
                   >
                     <TileLayer
@@ -102,6 +128,7 @@ const CIODES = () => {
               )}
             </div>
 
+            {/* GBM Selection */}
             <div>
               <label className="block text-sm font-medium mb-2">
                 Selecione o GBM
@@ -120,18 +147,6 @@ const CIODES = () => {
               </Select>
             </div>
 
-            {location.state?.mediaItems && (
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Mídias Anexadas
-                </label>
-                <MediaPreviewList 
-                  mediaItems={location.state.mediaItems} 
-                  onRemove={() => {}} 
-                />
-              </div>
-            )}
-
             <Button 
               onClick={handleSendToGBM}
               className="w-full bg-emergency hover:bg-emergency/90"
@@ -145,4 +160,4 @@ const CIODES = () => {
   );
 };
 
-export default CIODES;
+export default CIODES_Recebimento;
