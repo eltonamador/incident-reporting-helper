@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Solicitante_Esperando from "./pages/Solicitante_Esperando";
-import CIODES from "./pages/CIODES";
+import CIODES_Recebimento from "./pages/CIODES_Recebimento";
 
 const queryClient = new QueryClient();
 
@@ -18,7 +18,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/solicitante-esperando" element={<Solicitante_Esperando />} />
-          <Route path="/ciodes" element={<CIODES />} />
+          <Route path="/ciodes" element={<CIODES_Recebimento />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
