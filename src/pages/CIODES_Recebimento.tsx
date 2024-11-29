@@ -68,16 +68,6 @@ const CIODES_Recebimento = () => {
           <h2 className="text-xl font-bold mb-4">Detalhes da Ocorrência</h2>
           
           <div className="space-y-6">
-            {/* Emergency Type Section */}
-            <div className="border-b pb-4">
-              <h3 className="text-sm font-medium text-gray-600 mb-2">
-                Tipo de Ocorrência
-              </h3>
-              <div className="p-3 bg-gray-100 rounded">
-                {location.state?.emergencyType || "Não especificado"}
-              </div>
-            </div>
-
             {/* Text Content Section */}
             {location.state?.textContent && (
               <div className="border-b pb-4">
@@ -90,42 +80,41 @@ const CIODES_Recebimento = () => {
               </div>
             )}
 
-            {/* Videos Section */}
-            {videoItems.length > 0 && (
+            {/* Media Section */}
+            {(videoItems.length > 0 || imageItems.length > 0 || audioItems.length > 0) && (
               <div className="border-b pb-4">
                 <h3 className="text-sm font-medium text-gray-600 mb-2">
-                  Vídeos
+                  Mídias Anexadas
                 </h3>
-                <MediaPreviewList 
-                  mediaItems={videoItems}
-                  onRemove={() => {}}
-                />
-              </div>
-            )}
-
-            {/* Images Section */}
-            {imageItems.length > 0 && (
-              <div className="border-b pb-4">
-                <h3 className="text-sm font-medium text-gray-600 mb-2">
-                  Fotos
-                </h3>
-                <MediaPreviewList 
-                  mediaItems={imageItems}
-                  onRemove={() => {}}
-                />
-              </div>
-            )}
-
-            {/* Audio Section */}
-            {audioItems.length > 0 && (
-              <div className="border-b pb-4">
-                <h3 className="text-sm font-medium text-gray-600 mb-2">
-                  Áudios
-                </h3>
-                <MediaPreviewList 
-                  mediaItems={audioItems}
-                  onRemove={() => {}}
-                />
+                {videoItems.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="text-sm text-gray-500 mb-2">Vídeos</h4>
+                    <MediaPreviewList 
+                      mediaItems={videoItems}
+                      onRemove={() => {}}
+                    />
+                  </div>
+                )}
+                
+                {imageItems.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="text-sm text-gray-500 mb-2">Fotos</h4>
+                    <MediaPreviewList 
+                      mediaItems={imageItems}
+                      onRemove={() => {}}
+                    />
+                  </div>
+                )}
+                
+                {audioItems.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="text-sm text-gray-500 mb-2">Áudios</h4>
+                    <MediaPreviewList 
+                      mediaItems={audioItems}
+                      onRemove={() => {}}
+                    />
+                  </div>
+                )}
               </div>
             )}
 

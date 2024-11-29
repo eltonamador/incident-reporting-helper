@@ -60,7 +60,7 @@ const MediaCaptureSection = () => {
 
   const handleSend = () => {
     toast.success("Informações enviadas ao CIODES!");
-    navigate("/solicitante-esperando", { 
+    navigate("/ciodes", { 
       state: { 
         mediaItems,
         textContent 
