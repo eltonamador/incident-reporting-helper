@@ -1,15 +1,53 @@
-import { FireExtinguisher, TreePine, Building2, ArrowUpFromLine, Car, LifeBuoy, HelpCircle, Text } from "lucide-react";
+import { FireExtinguisher, TreePine, Building2, ArrowUpFromLine, Car, LifeBuoy, HelpCircle } from "lucide-react";
 import EmergencyTypeButton from "@/components/EmergencyTypeButton";
 import MediaCaptureSection from "@/components/MediaCaptureSection";
 import { toast } from "sonner";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [selectedEmergency, setSelectedEmergency] = useState<string | null>(null);
+  const [coordinates, setCoordinates] = useState<{lat: number, lng: number} | null>(null);
 
   const handleEmergencySelect = (type: string) => {
     setSelectedEmergency(type);
     toast.info(`Tipo de ocorrência selecionado: ${type}`);
+    // Get location when emergency type is selected
+    getLocation();
+  };
+
+  const getLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setCoordinates({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+          toast.success("Localização obtida com sucesso!");
+        },
+        (error) => {
+          toast.error("Erro ao obter localização: " + error.message);
+        }
+      );
+    } else {
+      toast.error("Geolocalização não suportada pelo navegador");
+    }
+  };
+
+  const handleSubmit = () => {
+    if (!selectedEmergency) {
+      toast.error("Selecione um tipo de ocorrência");
+      return;
+    }
+
+    navigate("/ciodes", {
+      state: {
+        emergencyType: selectedEmergency,
+        coordinates,
+      }
+    });
   };
 
   const emergencyTypes = [
@@ -43,7 +81,22 @@ const Index = () => {
           ))}
         </div>
 
+        {coordinates && (
+          <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+            <p className="text-sm text-green-800">
+              Localização capturada: {coordinates.lat.toFixed(6)}, {coordinates.lng.toFixed(6)}
+            </p>
+          </div>
+        )}
+
         <MediaCaptureSection />
+
+        <button
+          onClick={handleSubmit}
+          className="w-full bg-emergency hover:bg-emergency/90 text-white py-3 rounded-lg font-medium"
+        >
+          Enviar Ocorrência
+        </button>
       </div>
     </div>
   );
