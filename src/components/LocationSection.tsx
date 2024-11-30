@@ -8,10 +8,10 @@ interface LocationSectionProps {
 }
 
 const LocationSection = ({ coordinates, getLocation }: LocationSectionProps) => {
-  // Create center coordinates as LatLngExpression
-  const center: LatLngExpression = coordinates 
+  const defaultCenter: [number, number] = [-20.2976, -40.2928]; // Default to Vitória, ES
+  const center: [number, number] = coordinates 
     ? [coordinates.lat, coordinates.lng] 
-    : [-20.2976, -40.2928]; // Default to Vitória, ES
+    : defaultCenter;
 
   return (
     <div>
@@ -31,7 +31,7 @@ const LocationSection = ({ coordinates, getLocation }: LocationSectionProps) => 
       <div className="h-[200px] w-full rounded-lg overflow-hidden border border-gray-200">
         <MapContainer
           className="h-full w-full"
-          center={center as [number, number]}
+          center={center}
           zoom={13}
           scrollWheelZoom={false}
         >
