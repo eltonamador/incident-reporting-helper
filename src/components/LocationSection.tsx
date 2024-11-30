@@ -31,7 +31,7 @@ const LocationSection = ({ coordinates, getLocation }: LocationSectionProps) => 
       <div className="h-[200px] w-full rounded-lg overflow-hidden border border-gray-200">
         <MapContainer
           className="h-full w-full"
-          center={center}
+          center={center as [number, number]}
           zoom={13}
           scrollWheelZoom={false}
         >
