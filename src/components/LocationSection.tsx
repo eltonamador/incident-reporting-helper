@@ -33,7 +33,7 @@ const LocationSection = ({ coordinates, getLocation }: LocationSectionProps) => 
           className="h-full w-full"
           center={center}
           zoom={13}
-          key={`${center[0]}-${center[1]}`}
+          scrollWheelZoom={false}
         >
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           {coordinates && <Marker position={[coordinates.lat, coordinates.lng]} />}

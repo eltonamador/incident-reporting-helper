@@ -49,6 +49,7 @@ export type Database = {
           id: string
           location_lat: number | null
           location_lng: number | null
+          observations: string | null
           status: Database["public"]["Enums"]["occurrence_status"] | null
           updated_at: string | null
         }
@@ -59,6 +60,7 @@ export type Database = {
           id?: string
           location_lat?: number | null
           location_lng?: number | null
+          observations?: string | null
           status?: Database["public"]["Enums"]["occurrence_status"] | null
           updated_at?: string | null
         }
@@ -69,6 +71,7 @@ export type Database = {
           id?: string
           location_lat?: number | null
           location_lng?: number | null
+          observations?: string | null
           status?: Database["public"]["Enums"]["occurrence_status"] | null
           updated_at?: string | null
         }
