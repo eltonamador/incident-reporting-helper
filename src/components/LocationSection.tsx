@@ -1,0 +1,46 @@
+import { MapContainer, TileLayer, Marker } from 'react-leaflet';
+import { LatLngExpression } from 'leaflet';
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+
+interface LocationSectionProps {
+  coordinates: { lat: number; lng: number } | null;
+  getLocation: () => void;
+}
+
+const LocationSection = ({ coordinates, getLocation }: LocationSectionProps) => {
+  // Create center coordinates as LatLngExpression
+  const center: LatLngExpression = coordinates 
+    ? [coordinates.lat, coordinates.lng] 
+    : [-20.2976, -40.2928]; // Default to Vitória, ES
+
+  return (
+    <div>
+      <h3 className="text-sm font-medium text-gray-600 mb-2">
+        Localização
+      </h3>
+      <Button 
+        onClick={getLocation}
+        className="w-full mb-4"
+        variant="outline"
+      >
+        {coordinates 
+          ? `Lat: ${coordinates.lat.toFixed(6)}, Lng: ${coordinates.lng.toFixed(6)}`
+          : "Obter Localização"}
+      </Button>
+      
+      <div className="h-[200px] w-full rounded-lg overflow-hidden border border-gray-200">
+        <MapContainer
+          className="h-full w-full"
+          center={center}
+          zoom={13}
+        >
+          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          {coordinates && <Marker position={[coordinates.lat, coordinates.lng]} />}
+        </MapContainer>
+      </div>
+    </div>
+  );
+};
+
+export default LocationSection;

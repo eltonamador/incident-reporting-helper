@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
-import MediaPreviewList from "@/components/MediaPreviewList";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -10,25 +9,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MapContainer, TileLayer, Marker } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-import { LatLngExpression } from 'leaflet';
+import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
-
-// Fix Leaflet icon issue
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
+import LocationSection from "@/components/LocationSection";
+import MediaSection from "@/components/MediaSection";
 
 const CIODES_Recebimento = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [selectedGBM, setSelectedGBM] = useState("");
   const [coordinates, setCoordinates] = useState<{lat: number, lng: number} | null>(null);
+  const [observations, setObservations] = useState("");
 
   const getLocation = () => {
     if (navigator.geolocation) {
@@ -63,7 +54,8 @@ const CIODES_Recebimento = () => {
           location_lat: coordinates?.lat,
           location_lng: coordinates?.lng,
           status: 'pending',
-          assigned_gbm: selectedGBM
+          assigned_gbm: selectedGBM,
+          observations: observations
         })
         .select()
         .single();
@@ -97,11 +89,6 @@ const CIODES_Recebimento = () => {
   const imageItems = location.state?.mediaItems?.filter((item: any) => item.type === "image") || [];
   const audioItems = location.state?.mediaItems?.filter((item: any) => item.type === "audio") || [];
 
-  // Create center coordinates as LatLngExpression
-  const center: LatLngExpression = coordinates 
-    ? [coordinates.lat, coordinates.lng] 
-    : [-20.2976, -40.2928]; // Default to Vitória, ES
-
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-lg mx-auto space-y-6">
@@ -121,70 +108,33 @@ const CIODES_Recebimento = () => {
               </div>
             )}
 
+            {/* Observations Section */}
+            <div className="border-b pb-4">
+              <h3 className="text-sm font-medium text-gray-600 mb-2">
+                Observações
+              </h3>
+              <Textarea
+                value={observations}
+                onChange={(e) => setObservations(e.target.value)}
+                placeholder="Digite observações adicionais sobre a ocorrência..."
+                className="min-h-[100px]"
+              />
+            </div>
+
             {/* Media Section */}
             {(videoItems.length > 0 || imageItems.length > 0 || audioItems.length > 0) && (
-              <div className="border-b pb-4">
-                <h3 className="text-sm font-medium text-gray-600 mb-2">
-                  Mídias Anexadas
-                </h3>
-                {videoItems.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="text-sm text-gray-500 mb-2">Vídeos</h4>
-                    <MediaPreviewList 
-                      mediaItems={videoItems}
-                      onRemove={() => {}}
-                    />
-                  </div>
-                )}
-                
-                {imageItems.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="text-sm text-gray-500 mb-2">Fotos</h4>
-                    <MediaPreviewList 
-                      mediaItems={imageItems}
-                      onRemove={() => {}}
-                    />
-                  </div>
-                )}
-                
-                {audioItems.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="text-sm text-gray-500 mb-2">Áudios</h4>
-                    <MediaPreviewList 
-                      mediaItems={audioItems}
-                      onRemove={() => {}}
-                    />
-                  </div>
-                )}
-              </div>
+              <MediaSection
+                videoItems={videoItems}
+                imageItems={imageItems}
+                audioItems={audioItems}
+              />
             )}
 
             {/* Location Section */}
-            <div>
-              <h3 className="text-sm font-medium text-gray-600 mb-2">
-                Localização
-              </h3>
-              <Button 
-                onClick={getLocation}
-                className="w-full mb-4"
-                variant="outline"
-              >
-                {coordinates 
-                  ? `Lat: ${coordinates.lat.toFixed(6)}, Lng: ${coordinates.lng.toFixed(6)}`
-                  : "Obter Localização"}
-              </Button>
-              
-              <div className="h-[200px] w-full rounded-lg overflow-hidden border border-gray-200">
-                <MapContainer
-                  className="h-full w-full"
-                  zoom={13}
-                  center={center}
-                >
-                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                  {coordinates && <Marker position={[coordinates.lat, coordinates.lng]} />}
-                </MapContainer>
-              </div>
-            </div>
+            <LocationSection
+              coordinates={coordinates}
+              getLocation={getLocation}
+            />
 
             {/* GBM Selection */}
             <div>
