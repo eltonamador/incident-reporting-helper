@@ -77,8 +77,29 @@ const CIODES_Recebimento = () => {
         await Promise.all(mediaPromises);
       }
 
+      // Get the route based on the selected GBM
+      const gbmRoutes: { [key: string]: string } = {
+        "1º GBM": "/1gbm",
+        "2º GBM": "/2gbm",
+        "GAPH": "/gaph",
+        "GMAF": "/gmaf",
+        "5º GBM": "/5gbm"
+      };
+
+      const route = gbmRoutes[selectedGBM];
+      
+      // Navigate to the corresponding GBM page with all the data
+      navigate(route, {
+        state: {
+          occurrence,
+          textContent: location.state?.textContent,
+          mediaItems: location.state?.mediaItems,
+          coordinates,
+          observations
+        }
+      });
+
       toast.success(`Ocorrência enviada para ${selectedGBM}`);
-      navigate("/");
     } catch (error: any) {
       toast.error(`Erro ao enviar ocorrência: ${error.message}`);
     }

@@ -1,7 +1,6 @@
 import { MapContainer, TileLayer, Marker } from 'react-leaflet';
 import { LatLngExpression } from 'leaflet';
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 
 interface LocationSectionProps {
   coordinates: { lat: number; lng: number } | null;
@@ -34,6 +33,7 @@ const LocationSection = ({ coordinates, getLocation }: LocationSectionProps) => 
           className="h-full w-full"
           center={center}
           zoom={13}
+          key={`${center[0]}-${center[1]}`}
         >
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           {coordinates && <Marker position={[coordinates.lat, coordinates.lng]} />}
