@@ -12,7 +12,7 @@ const MediaSection = ({ videoItems, imageItems, audioItems }: MediaSectionProps)
       <h3 className="text-sm font-medium text-gray-600 mb-2">
         Mídias Anexadas
       </h3>
-      {videoItems.length > 0 && (
+      {videoItems && videoItems.length > 0 && (
         <div className="mb-4">
           <h4 className="text-sm text-gray-500 mb-2">Vídeos</h4>
           <MediaPreviewList 
@@ -22,7 +22,7 @@ const MediaSection = ({ videoItems, imageItems, audioItems }: MediaSectionProps)
         </div>
       )}
       
-      {imageItems.length > 0 && (
+      {imageItems && imageItems.length > 0 && (
         <div className="mb-4">
           <h4 className="text-sm text-gray-500 mb-2">Fotos</h4>
           <MediaPreviewList 
@@ -32,7 +32,7 @@ const MediaSection = ({ videoItems, imageItems, audioItems }: MediaSectionProps)
         </div>
       )}
       
-      {audioItems.length > 0 && (
+      {audioItems && audioItems.length > 0 && (
         <div className="mb-4">
           <h4 className="text-sm text-gray-500 mb-2">Áudios</h4>
           <MediaPreviewList 
