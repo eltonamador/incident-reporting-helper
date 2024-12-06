@@ -1,189 +1,142 @@
-import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import LocationSection from "@/components/LocationSection";
 import MediaSection from "@/components/MediaSection";
 
+interface Occurrence {
+  id: string;
+  description: string;
+  location_lat: number | null;
+  location_lng: number | null;
+  observations: string | null;
+  status: "pending" | "assigned" | "in_progress" | "completed";
+  created_at: string;
+}
+
+interface OccurrenceMedia {
+  id: string;
+  occurrence_id: string;
+  media_type: string;
+  media_url: string;
+}
+
 const CIODES_Recebimento = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [selectedGBM, setSelectedGBM] = useState("");
-  const [coordinates, setCoordinates] = useState<{lat: number, lng: number} | null>(null);
-  const [observations, setObservations] = useState("");
+  // Fetch pending occurrences
+  const { data: occurrences, isLoading: isLoadingOccurrences } = useQuery({
+    queryKey: ["pending-occurrences"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("occurrences")
+        .select("*")
+        .eq("status", "pending")
+        .order("created_at", { ascending: false });
 
-  const getLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCoordinates({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-        },
-        (error) => {
-          toast.error("Erro ao obter localização: " + error.message);
-        }
-      );
-    } else {
-      toast.error("Geolocalização não suportada pelo navegador");
-    }
-  };
-
-  const handleSendToGBM = async () => {
-    if (!selectedGBM) {
-      toast.error("Selecione um GBM");
-      return;
-    }
-
-    try {
-      // Create occurrence record
-      const { data: occurrence, error: occurrenceError } = await supabase
-        .from('occurrences')
-        .insert({
-          description: location.state?.textContent || '',
-          location_lat: coordinates?.lat,
-          location_lng: coordinates?.lng,
-          status: 'pending',
-          assigned_gbm: selectedGBM,
-          observations: observations
-        })
-        .select()
-        .single();
-
-      if (occurrenceError) throw occurrenceError;
-
-      // Upload media files
-      if (location.state?.mediaItems?.length > 0) {
-        const mediaPromises = location.state.mediaItems.map(async (item: any) => {
-          return supabase
-            .from('occurrence_media')
-            .insert({
-              occurrence_id: occurrence.id,
-              media_type: item.type,
-              media_url: item.url
-            });
-        });
-
-        await Promise.all(mediaPromises);
+      if (error) {
+        toast.error("Erro ao carregar ocorrências");
+        throw error;
       }
 
-      // Get the route based on the selected GBM
-      const gbmRoutes: { [key: string]: string } = {
-        "1º GBM": "/1gbm",
-        "2º GBM": "/2gbm",
-        "GAPH": "/gaph",
-        "GMAF": "/gmaf",
-        "5º GBM": "/5gbm"
-      };
+      return data as Occurrence[];
+    },
+  });
 
-      const route = gbmRoutes[selectedGBM];
-      
-      // Navigate to the corresponding GBM page with all the data
-      navigate(route, {
-        state: {
-          occurrence,
-          textContent: location.state?.textContent,
-          mediaItems: location.state?.mediaItems,
-          coordinates,
-          observations
-        }
-      });
+  // Fetch media for the latest occurrence
+  const { data: mediaItems, isLoading: isLoadingMedia } = useQuery({
+    queryKey: ["occurrence-media", occurrences?.[0]?.id],
+    enabled: !!occurrences?.[0]?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("occurrence_media")
+        .select("*")
+        .eq("occurrence_id", occurrences[0].id);
 
-      toast.success(`Ocorrência enviada para ${selectedGBM}`);
-    } catch (error: any) {
-      toast.error(`Erro ao enviar ocorrência: ${error.message}`);
-    }
-  };
+      if (error) {
+        toast.error("Erro ao carregar mídia");
+        throw error;
+      }
 
-  // Filter media items by type
-  const videoItems = location.state?.mediaItems?.filter((item: any) => item.type === "video") || [];
-  const imageItems = location.state?.mediaItems?.filter((item: any) => item.type === "image") || [];
-  const audioItems = location.state?.mediaItems?.filter((item: any) => item.type === "audio") || [];
+      return data as OccurrenceMedia[];
+    },
+  });
+
+  if (isLoadingOccurrences || isLoadingMedia) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-emergency" />
+      </div>
+    );
+  }
+
+  const latestOccurrence = occurrences?.[0];
+
+  if (!latestOccurrence) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 flex items-center justify-center">
+        <p className="text-gray-500">Nenhuma ocorrência pendente</p>
+      </div>
+    );
+  }
+
+  // Organize media items by type
+  const videoItems = mediaItems?.filter(item => item.media_type === "video") || [];
+  const imageItems = mediaItems?.filter(item => item.media_type === "image") || [];
+  const audioItems = mediaItems?.filter(item => item.media_type === "audio") || [];
+
+  const coordinates = latestOccurrence.location_lat && latestOccurrence.location_lng
+    ? {
+        lat: latestOccurrence.location_lat,
+        lng: latestOccurrence.location_lng,
+      }
+    : null;
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="max-w-lg mx-auto space-y-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-bold mb-4">Detalhes da Ocorrência</h2>
-          
-          <div className="space-y-6">
-            {/* Text Content Section */}
-            {location.state?.textContent && (
-              <div className="border-b pb-4">
-                <h3 className="text-sm font-medium text-gray-600 mb-2">
-                  Descrição da Ocorrência
-                </h3>
-                <div className="p-3 bg-gray-100 rounded">
-                  {location.state.textContent}
-                </div>
-              </div>
-            )}
+        <header className="text-center mb-8">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            Nova Ocorrência
+          </h1>
+          <p className="text-gray-600">
+            Recebida em: {new Date(latestOccurrence.created_at).toLocaleString()}
+          </p>
+        </header>
 
-            {/* Observations Section */}
-            <div className="border-b pb-4">
-              <h3 className="text-sm font-medium text-gray-600 mb-2">
-                Observações
-              </h3>
-              <Textarea
-                value={observations}
-                onChange={(e) => setObservations(e.target.value)}
-                placeholder="Digite observações adicionais sobre a ocorrência..."
-                className="min-h-[100px]"
-              />
-            </div>
+        {latestOccurrence.description && (
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold mb-2">Descrição</h2>
+            <p className="text-gray-700">{latestOccurrence.description}</p>
+          </div>
+        )}
 
-            {/* Media Section */}
-            {(videoItems.length > 0 || imageItems.length > 0 || audioItems.length > 0) && (
-              <MediaSection
-                videoItems={videoItems}
-                imageItems={imageItems}
-                audioItems={audioItems}
-              />
-            )}
+        {latestOccurrence.observations && (
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold mb-2">Observações</h2>
+            <p className="text-gray-700">{latestOccurrence.observations}</p>
+          </div>
+        )}
 
-            {/* Location Section */}
+        {(videoItems.length > 0 || imageItems.length > 0 || audioItems.length > 0) && (
+          <div className="bg-white rounded-lg shadow p-6">
+            <MediaSection
+              videoItems={videoItems}
+              imageItems={imageItems}
+              audioItems={audioItems}
+            />
+          </div>
+        )}
+
+        {coordinates && (
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold mb-4">Localização</h2>
             <LocationSection
               coordinates={coordinates}
-              getLocation={getLocation}
+              getLocation={() => {}}
             />
-
-            {/* GBM Selection */}
-            <div>
-              <h3 className="text-sm font-medium text-gray-600 mb-2">
-                Selecione o GBM
-              </h3>
-              <Select onValueChange={setSelectedGBM}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione um GBM" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1º GBM">1º GBM</SelectItem>
-                  <SelectItem value="2º GBM">2º GBM</SelectItem>
-                  <SelectItem value="GAPH">GAPH</SelectItem>
-                  <SelectItem value="GMAF">GMAF</SelectItem>
-                  <SelectItem value="5º GBM">5º GBM</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <Button 
-              onClick={handleSendToGBM}
-              className="w-full bg-emergency hover:bg-emergency/90"
-            >
-              Enviar ao GBM
-            </Button>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
