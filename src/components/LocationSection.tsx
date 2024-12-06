@@ -8,8 +8,8 @@ interface LocationSectionProps {
 }
 
 const LocationSection = ({ coordinates, getLocation }: LocationSectionProps) => {
-  const defaultCenter: [number, number] = [-20.2976, -40.2928]; // Default to Vitória, ES
-  const center: [number, number] = coordinates 
+  const defaultCenter: LatLngExpression = [-20.2976, -40.2928]; // Default to Vitória, ES
+  const center: LatLngExpression = coordinates 
     ? [coordinates.lat, coordinates.lng] 
     : defaultCenter;
 
@@ -31,12 +31,12 @@ const LocationSection = ({ coordinates, getLocation }: LocationSectionProps) => 
       <div className="h-[200px] w-full rounded-lg overflow-hidden border border-gray-200">
         <MapContainer
           className="h-full w-full"
-          center={center}
+          center={center as LatLngExpression}
           zoom={13}
           scrollWheelZoom={false}
         >
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          {coordinates && <Marker position={[coordinates.lat, coordinates.lng]} />}
+          {coordinates && <Marker position={[coordinates.lat, coordinates.lng] as LatLngExpression} />}
         </MapContainer>
       </div>
     </div>
