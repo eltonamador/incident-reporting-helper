@@ -3,10 +3,8 @@ import EmergencyTypeButton from "@/components/EmergencyTypeButton";
 import MediaCaptureSection from "@/components/MediaCaptureSection";
 import { toast } from "sonner";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 const Index = () => {
-  const navigate = useNavigate();
   const [selectedEmergency, setSelectedEmergency] = useState<string | null>(null);
   const [coordinates, setCoordinates] = useState<{lat: number, lng: number} | null>(null);
 
@@ -34,20 +32,6 @@ const Index = () => {
     } else {
       toast.error("Geolocalização não suportada pelo navegador");
     }
-  };
-
-  const handleSubmit = () => {
-    if (!selectedEmergency) {
-      toast.error("Selecione um tipo de ocorrência");
-      return;
-    }
-
-    navigate("/ciodes", {
-      state: {
-        emergencyType: selectedEmergency,
-        coordinates,
-      }
-    });
   };
 
   const emergencyTypes = [
@@ -90,13 +74,6 @@ const Index = () => {
         )}
 
         <MediaCaptureSection />
-
-        <button
-          onClick={handleSubmit}
-          className="w-full bg-emergency hover:bg-emergency/90 text-white py-3 rounded-lg font-medium"
-        >
-          Enviar Ocorrência
-        </button>
       </div>
     </div>
   );
