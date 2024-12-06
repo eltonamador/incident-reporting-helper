@@ -80,10 +80,16 @@ const CIODES_Recebimento = () => {
     );
   }
 
+  // Transform media items to the format expected by MediaSection
+  const transformedMediaItems = mediaItems?.map(item => ({
+    type: item.media_type,
+    url: item.media_url
+  })) || [];
+
   // Organize media items by type
-  const videoItems = mediaItems?.filter(item => item.media_type === "video") || [];
-  const imageItems = mediaItems?.filter(item => item.media_type === "image") || [];
-  const audioItems = mediaItems?.filter(item => item.media_type === "audio") || [];
+  const videoItems = transformedMediaItems.filter(item => item.type === "video") || [];
+  const imageItems = transformedMediaItems.filter(item => item.type === "image") || [];
+  const audioItems = transformedMediaItems.filter(item => item.type === "audio") || [];
 
   const coordinates = latestOccurrence.location_lat && latestOccurrence.location_lng
     ? {
