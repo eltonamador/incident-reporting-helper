@@ -26,12 +26,10 @@ const LocationSection = ({ coordinates, getLocation }: LocationSectionProps) => 
     <div className="space-y-4">
       <div className="h-[300px] rounded-lg overflow-hidden">
         <MapContainer
-          className="h-full w-full"
-          center={position}
+          center={position as LatLngExpression}
           zoom={15}
           scrollWheelZoom={false}
-          key={`${coordinates.lat}-${coordinates.lng}`}
-          style={{ height: "100%", width: "100%" }}
+          className="h-full w-full"
         >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
